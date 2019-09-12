@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * TODO 后续关注
+ */
 public abstract class FamilyClassStructure implements ClassStructure {
 
     private final LazyGet<Set<ClassStructure>> familyInterfaceClassStructuresLazyGet

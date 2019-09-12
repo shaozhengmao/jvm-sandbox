@@ -193,11 +193,12 @@ check_permission()
 # reset some options for env
 reset_for_env()
 {
-
+    #使用默认环境变量 JAVA_HOME
     # use the env JAVA_HOME for default
     [[ ! -z ${JAVA_HOME} ]] \
         && SANDBOX_JAVA_HOME="${JAVA_HOME}"
 
+    # 或者通过TARGET_JVM_PID查找 设置sandbox环境变量
     # use the target JVM for SANDBOX_JAVA_HOME
     [[ -z ${SANDBOX_JAVA_HOME} ]] \
         && SANDBOX_JAVA_HOME="$(\
@@ -215,12 +216,13 @@ reset_for_env()
 
     [[ ! -x "${SANDBOX_JAVA_HOME}/bin/java" ]] \
         && exit_on_err 1 "permission denied, ${SANDBOX_JAVA_HOME}/bin/java is not executable!"
-
+    #判断 JVM 版本
     # check the jvm version, we need 6+
     local JAVA_VERSION=$("${SANDBOX_JAVA_HOME}/bin/java" -version 2>&1|awk -F '"' '/version/&&$2>"1.5"{print $2}')
     [[ -z ${JAVA_VERSION} ]] \
         && exit_on_err 1 "illegal java version: ${JAVA_VERSION}, please make sure target java process: ${TARGET_JVM_PID} run int JDK[6,11]"
 
+    #若 ${JAVA_HOME}/lib/tools.jar 存在，则通过 -Xbootclasspath/a 这个配置，将它加入 classpath 末尾，为执行 attach_jvm 方法做准备
     [[ -f "${SANDBOX_JAVA_HOME}"/lib/tools.jar ]] \
         && SANDBOX_JVM_OPS="${SANDBOX_JVM_OPS} -Xbootclasspath/a:${SANDBOX_JAVA_HOME}/lib/tools.jar"
 
@@ -235,6 +237,7 @@ function attach_jvm() {
     local token=`date |head|cksum|sed 's/ //g'`
 
     # attach target jvm
+    # 通过java -jar 命令启动 sandbox-core.jar 并传递参数 1. TARGET_JVM_PID 2. sandbox-agent.jar 3. 启动要用到的数据信息
     "${SANDBOX_JAVA_HOME}/bin/java" \
         ${SANDBOX_JVM_OPS} \
         -jar ${SANDBOX_LIB_DIR}/sandbox-core.jar \

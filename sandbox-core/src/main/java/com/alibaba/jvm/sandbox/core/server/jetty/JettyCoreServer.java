@@ -179,14 +179,15 @@ public class JettyCoreServer implements CoreServer {
             initializer.initProcess(new Initializer.Processor() {
                 @Override
                 public void process() throws Throwable {
+                    //初始化logback日志框架
                     LogbackUtils.init(
                             cfg.getNamespace(),
                             cfg.getCfgLibPath() + File.separator + "sandbox-logback.xml"
                     );
                     logger.info("initializing server. cfg={}", cfg);
-                    jvmSandbox = new JvmSandbox(cfg, inst);
-                    initHttpServer();
-                    initJettyContextHandler();
+                    jvmSandbox = new JvmSandbox(cfg, inst);//创建一个沙箱对象
+                    initHttpServer();//启动httpServer
+                    initJettyContextHandler();//初始化jetty的上下文
                     httpServer.start();
                 }
             });
